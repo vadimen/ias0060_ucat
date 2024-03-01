@@ -15,10 +15,11 @@ class DepthControl(Node):
         self.dt = 0.1
         self.last_errors = []
         self.rms_errors = []
+        self.previous_error = 0
 
-        self.P = 15
-        self.I = 120
-        self.D = 120
+        self.P = 1
+        self.I = 0.5
+        self.D = 0.8
 
         if not os.path.exists('csv'):
             os.makedirs('csv')
@@ -57,7 +58,11 @@ class DepthControl(Node):
             self.rms_errors.append(error ** 2)
             self.last_errors.append(error * self.dt)
 
-            desired_value = self.P * error + self.I * sum(self.last_errors[-50:]) + self.D * error / self.dt
+
+            
+
+            desired_value = self.P * error + self.I * sum(self.last_errors[-50:]) + \
+                                        self.D * (error - self.previous_error) / self.dt
 
             # Create message
             msg = WrenchStamped()
@@ -72,6 +77,8 @@ class DepthControl(Node):
             self.csv_writer.writerow([self.current_depth, error, rms, desired_value])
             self.get_logger().info(f"Current depth: {self.current_depth}, Error: {error}, RMS: {rms}")
             self.row_count += 1
+
+            self.previous_error = error
 
             if self.row_count >= self.nr_samples:
                 self.csv_file.close()
