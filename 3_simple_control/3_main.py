@@ -56,10 +56,7 @@ class DepthControl(Node):
         if self.current_depth is not None:  # after first init
             error = self.desired_depth - self.current_depth
             self.rms_errors.append(error ** 2)
-            self.last_errors.append(error * self.dt)
-
-
-            
+            self.last_errors.append(error * self.dt)            
 
             desired_value = self.P * error + self.I * sum(self.last_errors[-50:]) + \
                                         self.D * (error - self.previous_error) / self.dt
