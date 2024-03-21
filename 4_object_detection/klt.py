@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 # Load the video
-cap = cv2.VideoCapture('test3.mp4')
+cap = cv2.VideoCapture('test2.mp4')
 
 # Parameters for ShiTomasi corner detection
 feature_params = dict(maxCorners=100, qualityLevel=0.01, minDistance=10, blockSize=7)
@@ -47,6 +47,7 @@ while 1:
     ret, frame = cap.read()
     if not ret:
         break
+
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
     p1, st, err, good_new, good_old, x_min, y_min, x_max, y_max = calc_flow(old_gray, frame_gray, p0, lk_params)
