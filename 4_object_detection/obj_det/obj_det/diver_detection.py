@@ -5,6 +5,7 @@ from cv_bridge import CvBridge
 
 from ultralytics import YOLO
 from sensor_msgs.msg import Image
+import cv2
 
 model = YOLO('/home/ias0060/dev_ws/src/obj_det/obj_det/best.pt') 
 
@@ -29,13 +30,19 @@ class DiverDetection(Node):
 
         results = model(cv_image)
 
-        img = results[0].plot()
+        if results is not None and len(results[0].boxes.conf) > 0:
+            print(results[0].boxes)
+            conf = results[0].boxes.conf[0].item()
+            #round conf to 2 decimal places
+            #conf = round(conf, 2)
+            box = results[0].boxes.data[0].tolist()[0:4]
 
-        # Convert OpenCV image back to ROS Image message
-        ros_image = self.br.cv2_to_imgmsg(img, encoding="bgr8")
+            cv2.rectangle(cv_image, (int(box[0]), int(box[1])), (int(box[2]), int(box[3])), (0, 255, 0), 2)
+            #cv2.putText(cv_image, str(conf), (int(box[0]), int(box[1])), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
-        # Publish the image to the new topic
-        self.publisher.publish(ros_image)
+            # Convert OpenCV image to ROS Image message
+            msg = self.br.cv2_to_imgmsg(cv_image, encoding="bgr8")
+        self.publisher.publish(msg)
 
 def main(args=None):
   rclpy.init(args=args)
